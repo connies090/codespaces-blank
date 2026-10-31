@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f5eb">
+  <title>Connie's Egg Counter</title>
+  <style>
+    :root { color-scheme: light; --cream: #f8f5eb; --ink: #344536; --sage: #647e59; --line: #d9dfce; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; background: var(--cream); color: var(--ink); font-family: ui-rounded, "Trebuchet MS", sans-serif; }
+    body::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .3; background-image: radial-gradient(#b4b99d .7px, transparent .7px); background-size: 9px 9px; }
+    main { position: relative; width: min(100% - 36px, 620px); margin: auto; padding: 48px 0 28px; text-align: center; }
+    .eyebrow { margin: 0 0 16px; color: #69745d; font-size: 11px; font-weight: bold; letter-spacing: .22em; text-transform: uppercase; }
+    h1 { margin: 0; font-family: Georgia, serif; font-size: clamp(34px, 6vw, 48px); font-weight: normal; letter-spacing: -.04em; }
+    .subtitle { color: #6c7565; line-height: 1.6; margin: 12px 0 26px; font-size: 15px; }
+    .hen { width: 130px; height: 100px; margin: 0 auto -4px; position: relative; z-index: 1; }
+    .card { background: #fffdf6; border: 1px solid var(--line); border-radius: 25px; box-shadow: 0 12px 35px #3c4d3510; padding: 30px clamp(18px, 5vw, 42px) 24px; }
+    .date { display: inline-block; padding: 8px 14px; border-radius: 20px; background: #edf0e4; color: #536647; font-size: 12px; }
+    .label { margin: 27px 0 0; text-transform: uppercase; letter-spacing: .17em; font-size: 11px; font-weight: bold; color: #6d7865; }
+    .count { display: block; font-family: Georgia, serif; font-size: clamp(100px, 23vw, 140px); line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .caption { margin: 0 0 28px; font-size: 14px; color: #7b816f; }
+    .buttons { display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; }
+    button { min-height: 56px; border-radius: 13px; border: 1px solid var(--line); font: bold 15px "Trebuchet MS", sans-serif; cursor: pointer; touch-action: manipulation; transition: background .15s, transform .15s; }
+    button:active { transform: translateY(2px); }
+    button:focus-visible { outline: 3px solid #c59848; outline-offset: 4px; }
+    button:disabled { cursor: default; opacity: .45; }
+    .remove { background: #f4f4eb; color: var(--ink); }
+    .add { background: var(--sage); color: white; border-color: var(--sage); }
+    .add:hover { background: #526d47; }
+    .symbol { font-size: 23px; vertical-align: -1px; padding-right: 7px; }
+    .reset { background: none; color: #737a68; min-height: 44px; border: 0; margin-top: 14px; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
+    .save-note { border-top: 1px solid #e8e9dc; padding-top: 17px; margin: 9px 0 0; color: #737e69; font-size: 12px; line-height: 1.6; }
+    footer { color: #7c866f; font-family: Georgia, serif; font-style: italic; margin-top: 24px; font-size: 14px; }
+    .sprig { color: #8c9e77; font-style: normal; margin: 0 8px; }
+    @media (max-width: 400px) { main { padding-top: 30px; } .buttons { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Fresh from the coop</p>
+    <h1>Connie's Egg Counter</h1>
+    <p class="subtitle">Happy hens. Fresh eggs. Life's little joys.</p>
+    <div class="hen" aria-hidden="true">
+      <svg viewBox="0 0 150 115" width="130" height="100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 103 Q73 89 139 104" fill="none" stroke="#c9d2b6" stroke-width="3" stroke-linecap="round"/>
+        <path d="M62 92 L60 105 M84 92 L86 105 M54 106 H65 M80 106 H91" stroke="#bf914b" stroke-width="3" stroke-linecap="round"/>
+        <path d="M43 61 Q17 65 23 35 Q31 45 39 44 Q26 23 35 18 Q42 35 52 39 Q62 24 84 36 Q94 23 111 35 Q126 45 116 65 Q111 94 77 96 Q43 96 43 61Z" fill="#eee5cf" stroke="#a89e80" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M94 32 Q83 17 93 15 Q99 13 101 23 Q102 8 110 13 Q116 18 110 29 Q122 17 126 25 Q129 34 115 38" fill="#bb6952"/>
+        <path d="M118 45 L135 52 L118 57Z" fill="#d2a04d"/>
+        <path d="M115 59 Q125 72 115 75 Q106 72 110 62" fill="#bb6952"/>
+        <circle cx="109" cy="45" r="2.8" fill="#344536"/>
+        <path d="M57 58 Q87 48 88 69 Q87 87 61 80" fill="#e0d5b7" stroke="#b8ac8d" stroke-width="2" stroke-linecap="round"/>
+        <path d="M16 104 L12 95 M131 103 L137 94" stroke="#95a47e" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <section class="card" aria-label="Today's egg collection">
+      <time class="date" id="date"></time>
+      <p class="label">Eggs collected today</p>
+      <output class="count" id="count" aria-live="polite" aria-atomic="true">0</output>
+      <p class="caption" id="caption">A fresh start for a new day.</p>
+      <div class="buttons">
+        <button class="remove" id="remove" type="button" disabled><span class="symbol" aria-hidden="true">−</span>Remove Egg</button>
+        <button class="add" id="add" type="button"><span class="symbol" aria-hidden="true">+</span>Add Egg</button>
+      </div>
+      <button class="reset" id="reset" type="button">Reset today's count</button>
+      <p class="save-note" id="save-note">Your count is saved automatically in this browser.</p>
+    </section>
+    <footer><span class="sprig" aria-hidden="true">❧</span>A little gratitude for every egg.<span class="sprig" aria-hidden="true">❧</span></footer>
+  </main>
+  <script>
+    const storageKey = 'connies-egg-counter';
+    const countElement = document.getElementById('count');
+    const removeButton = document.getElementById('remove');
+    const dateElement = document.getElementById('date');
+    const caption = document.getElementById('caption');
+    const saveNote = document.getElementById('save-note');
+    let count = 0;
+    function localDate() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+    let day = localDate();
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey));
+      if (saved && saved.date === day && Number.isSafeInteger(saved.count) && saved.count >= 0) count = saved.count;
+    } catch { /* A missing or invalid saved count starts at zero. */ }
+    function render() {
+      countElement.textContent = count;
+      removeButton.disabled = count === 0;
+      document.getElementById('add').disabled = count === Number.MAX_SAFE_INTEGER;
+      dateElement.dateTime = day;
+      dateElement.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+      caption.textContent = count === 0 ? 'A fresh start for a new day.' : count === 1 ? 'One lovely egg from your girls.' : 'Look at what your girls laid!';
+    }
+    function save() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({ date: day, count }));
+        saveNote.textContent = 'Your count is saved automatically in this browser.';
+      } catch {
+        saveNote.textContent = 'This browser cannot save right now. Keep this page open to keep your count.';
+      }
+    }
+    function checkDay() {
+      if (day !== localDate()) { day = localDate(); count = 0; save(); render(); }
+    }
+    document.getElementById('add').addEventListener('click', () => {
+      checkDay();
+      if (count < Number.MAX_SAFE_INTEGER) count += 1;
+      save(); render();
+    });
+    removeButton.addEventListener('click', () => {
+      checkDay(); count = Math.max(0, count - 1); save(); render();
+    });
+    document.getElementById('reset').addEventListener('click', () => {
+      checkDay();
+      if (count > 0 && window.confirm("Reset today's egg count to zero?")) { count = 0; save(); render(); }
+    });
+    document.addEventListener('visibilitychange', checkDay);
+    setInterval(checkDay, 30000);
+    render();
+    save();
+  </script>
+</body>
+</html>
